@@ -1,0 +1,12 @@
+{
+  "name": "basic-control",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/marvindv/neidi-roomba",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "commander": "^7.0.0",
+    "dorita980": "^3.1.8"
+  }
+}
