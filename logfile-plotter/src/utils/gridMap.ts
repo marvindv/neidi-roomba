@@ -14,6 +14,9 @@ export class GridMap {
    */
   private grid: GridCell[][] = [];
 
+  private columnCount: number;
+  private rowCount: number;
+
   /**
    * Creates an instance of GridMap. All parameters are expected to be integers.
    *
@@ -28,15 +31,29 @@ export class GridMap {
       throw new Error('xMax, yMax and cellEdgeLength must be integers');
     }
 
-    const xCount = Math.ceil(this.xMax / this.cellEdgeLength);
-    const yCount = Math.ceil(this.yMax / this.cellEdgeLength);
+    this.columnCount = Math.ceil(this.xMax / this.cellEdgeLength);
+    this.rowCount = Math.ceil(this.yMax / this.cellEdgeLength);
 
-    for (let x = 0; x < xCount; x++) {
+    for (let x = 0; x < this.columnCount; x++) {
       // Don't use Array#fill with the object since then every column would have a reference on the
       // same object 🙄
-      const column: GridCell[] = new Array(yCount).fill(undefined).map(() => ({ isSet: false }));
+      const column: GridCell[] = new Array(this.rowCount)
+        .fill(undefined)
+        .map(() => ({ isSet: false }));
       this.grid.push(column);
     }
+  }
+
+  getColumnCount(): number {
+    return this.columnCount;
+  }
+
+  getRowCount(): number {
+    return this.rowCount;
+  }
+
+  getCellEdgeLength(): number {
+    return this.cellEdgeLength;
   }
 
   getCells(): GridCell[][] {
@@ -44,12 +61,12 @@ export class GridMap {
   }
 
   /**
-   * Determines for every cell in this grid whether there is a point
+   * Determines for every cell of this grid, whether a line of the given path touches it.
    *
    * @param {LogrunPoint[]} points
    * @memberof GridMap
    */
-  setCells(points: LogrunPoint[]): void {
+  setCellsBresenham(points: LogrunPoint[]): void {
     for (let x = 0; x < this.grid.length; x++) {
       for (let y = 0; y < this.grid[x].length; y++) {
         this.grid[x][y].isSet = false;
@@ -203,8 +220,7 @@ export class GridMap {
     const ix = Math.floor(x / this.cellEdgeLength);
     const iy = Math.floor(y / this.cellEdgeLength);
     if (!this.grid[ix]?.[iy]) {
-      //debugger;
-      console.warn(`Missing cell (${ix}, ${iy}), from point (${x}, ${y})`);
+      //console.warn(`Missing cell (${ix}, ${iy}), from point (${x}, ${y})`);
       return;
     }
 

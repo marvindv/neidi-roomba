@@ -1,5 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { ChangeEventHandler, useEffect, useState } from 'react';
+import Card from 'react-bootstrap/Card';
+import Col from 'react-bootstrap/Col';
+import Container from 'react-bootstrap/Container';
+import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
+import Row from 'react-bootstrap/Row';
 import { EXAMPLE_LOGRUN } from './example-logrun';
 import { GridMapPlot } from './GridMapPlot';
 import { PathPlot } from './PathPlot';
@@ -10,6 +15,9 @@ import { Logrun, LogrunBounds, LogrunPath } from './utils/logrun';
 type View = 'points' | 'path' | 'gridmap';
 
 export function PlotWalker() {
+  const [cliLog, setCliLog] = useState<string | null>(EXAMPLE_LOGRUN);
+  const [plotHeight] = useState(600);
+  const [plotWidth] = useState(600);
   const [swapXY, setSwapXY] = useState(true);
   const [firstQuadrant, setFirstQuadrant] = useState(true);
   const [selectedView, setSelectedView] = useState<View>('path');
@@ -23,7 +31,12 @@ export function PlotWalker() {
   const [slice, setSlice] = useState<LogrunPath>([]);
 
   useEffect(() => {
-    let logrun = Logrun.fromCLI(EXAMPLE_LOGRUN);
+    if (!cliLog) {
+      setLogrun(null);
+      return;
+    }
+
+    let logrun = Logrun.fromCLI(cliLog);
     if (swapXY) {
       logrun = logrun.swapXY();
     }
@@ -33,7 +46,7 @@ export function PlotWalker() {
     }
 
     setLogrun(logrun);
-  }, [setLogrun, swapXY, firstQuadrant]);
+  }, [cliLog, setLogrun, swapXY, firstQuadrant]);
 
   useEffect(() => {
     if (logrun) {
@@ -58,62 +71,117 @@ export function PlotWalker() {
     setSlice(path.slice(start, end + 1));
   }, [path, start, end]);
 
+  const handleLogrunFileChange: ChangeEventHandler<HTMLInputElement> = ev => {
+    const file = ev.target.files?.[0];
+    if (file) {
+      file
+        .text()
+        .then(content => setCliLog(content))
+        .catch(err => console.error('Failed to read CLI log:', err));
+    }
+  };
+
   return (
     <div>
-      {bounds && path && (
-        <div style={{ width: '500px', margin: '2rem auto' }}>
-          <div>
-            Swap X/Y:{' '}
-            <input type='checkbox' checked={swapXY} onChange={ev => setSwapXY(ev.target.checked)} />
-            First Quadrant:{' '}
-            <input
-              type='checkbox'
-              checked={firstQuadrant}
-              onChange={ev => setFirstQuadrant(ev.target.checked)}
-            />
-          </div>
+      <Container className='mt-3'>
+        <Row>
+          <Col>
+            <div>
+              <h4>CLI logrun.txt</h4>
+              <Form.File
+                className='position-relative'
+                required
+                name='file'
+                onChange={handleLogrunFileChange}
+              />
+            </div>
+            <div className='mt-3'>
+              <h4>Settings</h4>
+              <div>
+                <Form.Group>
+                  <Form.Check
+                    type='checkbox'
+                    label='Swap X/Y'
+                    checked={swapXY}
+                    onChange={ev => setSwapXY(ev.target.checked)}
+                  />
+                </Form.Group>
 
-          <StartEndRange
-            min={0}
-            max={path.length}
-            step={1}
-            start={start}
-            end={end}
-            onChange={(start, end) => {
-              setStart(start);
-              setEnd(end);
-            }}
-          />
+                <Form.Group>
+                  <Form.Check
+                    type='checkbox'
+                    label='Move into first quadrant'
+                    checked={firstQuadrant}
+                    onChange={ev => setFirstQuadrant(ev.target.checked)}
+                  />
+                </Form.Group>
+              </div>
+            </div>
 
-          <div style={{ textAlign: 'center' }}>
-            {start} - {end}
-          </div>
+            {bounds && path && (
+              <div className='mt-3'>
+                <h4>Range</h4>
+                <StartEndRange
+                  min={0}
+                  max={path.length}
+                  step={1}
+                  start={start}
+                  end={end}
+                  onChange={(start, end) => {
+                    setStart(start);
+                    setEnd(end);
+                  }}
+                />
 
-          <div>
-            <Nav
-              variant='pills'
-              activeKey={selectedView}
-              onSelect={key => setSelectedView(key as View)}
-            >
-              <Nav.Item>
-                <Nav.Link eventKey='points'>Points</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey='path'>Paths</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey='gridmap'>GridMap</Nav.Link>
-              </Nav.Item>
-            </Nav>
-          </div>
-
-          <div style={{ height: '500px' }}>
-            {selectedView === 'points' && <PointPlot bounds={bounds} path={slice} />}
-            {selectedView === 'path' && <PathPlot bounds={bounds} path={slice} />}
-            {selectedView === 'gridmap' && <GridMapPlot bounds={bounds} path={slice} />}
-          </div>
-        </div>
-      )}
+                <div style={{ textAlign: 'center' }}>
+                  {start} - {end}
+                </div>
+              </div>
+            )}
+          </Col>
+          <Col>
+            {bounds && path && (
+              <Card>
+                <Card.Header>
+                  <Nav
+                    variant='tabs'
+                    activeKey={selectedView}
+                    onSelect={key => setSelectedView(key as View)}
+                  >
+                    <Nav.Item>
+                      <Nav.Link eventKey='points'>Points</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                      <Nav.Link eventKey='path'>Paths</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                      <Nav.Link eventKey='gridmap'>GridMap</Nav.Link>
+                    </Nav.Item>
+                  </Nav>
+                </Card.Header>
+                <Card.Body>
+                  <div style={{ minHeight: plotHeight + 'px', minWidth: plotWidth + 'px' }}>
+                    {selectedView === 'points' && (
+                      <PointPlot bounds={bounds} path={slice} {...{ plotHeight, plotWidth }} />
+                    )}
+                    {selectedView === 'path' && (
+                      <PathPlot bounds={bounds} path={slice} {...{ plotHeight, plotWidth }} />
+                    )}
+                    {selectedView === 'gridmap' && (
+                      <GridMapPlot
+                        dataBounds={bounds}
+                        path={slice}
+                        canvasHeight={plotHeight}
+                        canvasWidth={plotWidth}
+                      />
+                    )}
+                  </div>
+                </Card.Body>
+              </Card>
+            )}
+          </Col>
+        </Row>
+      </Container>
     </div>
   );
 }

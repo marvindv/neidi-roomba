@@ -70,7 +70,6 @@ export class Logrun {
     const bounds = this.getBounds();
     const deltaX = Math.abs(Math.min(bounds.minX, 0));
     const deltaY = Math.abs(Math.min(bounds.minY, 0));
-    console.warn(deltaX, deltaY);
     if (deltaX === 0 && deltaY === 0) {
       // Nothing to do.
       return;

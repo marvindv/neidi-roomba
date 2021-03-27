@@ -23,7 +23,7 @@ control a Roomba 960 via local control in your network using
 5. Get your blid (username) and password by executing:
 
    ```
-   $ get-roomba-password <robotIP> 
+   $ get-roomba-password <robotIP>
    ```
 
 ## Use the CLI
@@ -43,10 +43,3 @@ Where `Command` can be:
 ## Troubleshooting
 
 - Sometimes commands are not received by the vacuum without an error.
-
-## TODO
-
-- Exactly what is the difference between the commands start and clean?
-- Interpretation of the coordinates in `mission.pose`
-- Handle commands not properly send or received by the vacuum.
-    * Repeat until mission changes to desired state?

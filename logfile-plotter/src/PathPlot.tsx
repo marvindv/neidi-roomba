@@ -1,10 +1,16 @@
 import { useEffect, useRef } from 'react';
 import { LogrunBounds, LogrunPath } from './utils/logrun';
 
-function drawPath(ctx: CanvasRenderingContext2D, path: LogrunPath) {
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+function drawPath(ctx: CanvasRenderingContext2D, path: LogrunPath, bounds: LogrunBounds) {
+  const scalingX = ctx.canvas.width / bounds.maxX;
+  const scalingY = ctx.canvas.height / bounds.maxY;
+  const scaling = Math.min(scalingX, scalingY);
 
-  ctx.fillStyle = '#000000';
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.setTransform(scaling, 0, 0, scaling, 0, 0);
+
+  ctx.strokeStyle = '#000000';
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(path[0][0], path[0][1]);
@@ -18,17 +24,17 @@ function drawPath(ctx: CanvasRenderingContext2D, path: LogrunPath) {
 export interface Props {
   bounds: LogrunBounds;
   path: LogrunPath;
+  plotHeight: number;
+  plotWidth: number;
 }
 
 /**
  * Requires all points/paths to be in the first quadrant.
  *
- * TOOD: Line width configurable
- *
  * @param props
  */
 export function PathPlot(props: Props) {
-  const { bounds, path } = props;
+  const { bounds, path, plotHeight, plotWidth } = props;
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -47,8 +53,8 @@ export function PathPlot(props: Props) {
       return;
     }
 
-    drawPath(context, path);
-  }, [path]);
+    drawPath(context, path, bounds);
+  }, [path, bounds]);
 
-  return <canvas ref={canvasRef} width={500} height={500}></canvas>;
+  return <canvas ref={canvasRef} width={plotWidth} height={plotHeight}></canvas>;
 }

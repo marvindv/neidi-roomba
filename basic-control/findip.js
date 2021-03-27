@@ -5,6 +5,5 @@ dorita980.getRobotIP((err, ip) => {
     return console.log("failed to find a robot:", err);
   }
 
-  console.log("found robot with ip", ip);
-  return;
+  console.log("found robot with ip:", ip);
 });

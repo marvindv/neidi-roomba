@@ -27,7 +27,7 @@ test('GridMap#setCells (0,0) - (0,1)', () => {
     [0, 0],
     [0, 1],
   ];
-  map.setCells(points);
+  map.setCellsBresenham(points);
   const expected: GridCell[][] = [
     [{ isSet: true }, { isSet: true }, { isSet: false }],
     [{ isSet: false }, { isSet: false }, { isSet: false }],
@@ -41,7 +41,7 @@ test('GridMap#setCells x=0', () => {
     [0, 0],
     [0, 2],
   ];
-  map.setCells(points);
+  map.setCellsBresenham(points);
   const expected: GridCell[][] = [
     [{ isSet: true }, { isSet: true }, { isSet: true }],
     [{ isSet: false }, { isSet: false }, { isSet: false }],
@@ -55,7 +55,7 @@ test('GridMap#setCells x=1', () => {
     [1, 0],
     [1, 1],
   ];
-  map.setCells(points);
+  map.setCellsBresenham(points);
   const expected: GridCell[][] = [
     [{ isSet: false }, { isSet: false }, { isSet: false }],
     [{ isSet: true }, { isSet: true }, { isSet: false }],
@@ -69,7 +69,7 @@ test('GridMap#setCells y=0', () => {
     [0, 0],
     [1, 0],
   ];
-  map.setCells(points);
+  map.setCellsBresenham(points);
   const expected: GridCell[][] = [
     [{ isSet: true }, { isSet: false }, { isSet: false }],
     [{ isSet: true }, { isSet: false }, { isSet: false }],
